@@ -26,5 +26,6 @@ jobs:
             -DpushChanges=true \
             -DlocalCheckout=false \
             -DpreparationGoals="clean verify" \
-            -Darguments="-DskipTests"
-            -Dgoals=""
+            -Darguments="-DskipTests" \
+            -Dgoals="" \
+            -DtagNameFormat="rel_@{project.version}"
