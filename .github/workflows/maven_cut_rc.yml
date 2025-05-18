@@ -1,0 +1,25 @@
+name: RC Cut Workflow
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to checkout'
+jobs:
+  Release-Candidate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Release branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: Perform Release
+        run: |
+          mvn release:clean \
+            release:prepare \
+            release:perform \
+            -DpushChanges=true \
+            -DlocalCheckout=false \
+            -DpreparationGoals="clean verify" \
+            -Darguments="-DskipTests"

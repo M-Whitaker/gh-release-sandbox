@@ -10,15 +10,6 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Perform Release
-        run: |
-          mvn release:clean \
-            release:prepare \
-            release:perform \
-            -DpushChanges=true \
-            -DlocalCheckout=false \
-            -DpreparationGoals="clean verify" \
-            -Darguments="-DskipTests"
       - name: Changelog from Conventional Commits
         id: changelog
         uses: requarks/changelog-action@v1
