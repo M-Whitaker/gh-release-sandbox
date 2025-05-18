@@ -1,1 +1,1 @@
-// We have now added a new Java Feature!
+// Small change within the feature
