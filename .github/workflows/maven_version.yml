@@ -108,7 +108,7 @@ jobs:
             -DdevelopmentVersion=$DEV_VERSION \
             -DpushChanges=true \
             -DautoVersionSubmodules=true \
-            -DupdateBranchVersions=true \
+            -DupdateBranchVersions=false \
             -DupdateWorkingCopyVersions=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
