@@ -1,1 +1,1 @@
-// Here we have some Java Code!
+// We have now added a new Java Feature!
