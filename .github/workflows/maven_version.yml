@@ -55,13 +55,11 @@ jobs:
             NEW_MINOR=0
           else
             NEW_MAJOR=$MAJOR
-            NEW_MINOR=$((MINOR + 1))
+            NEW_MINOR=$MINOR
           fi
           
           RELEASE_BRANCH="release/$NEW_MAJOR.$NEW_MINOR.x"
           echo "release_branch=$RELEASE_BRANCH" >> $GITHUB_OUTPUT
-          echo "new_major=$NEW_MAJOR" >> $GITHUB_OUTPUT
-          echo "new_minor=$NEW_MINOR" >> $GITHUB_OUTPUT
       
       - name: Check if release branch exists
         id: check_branch
@@ -84,56 +82,26 @@ jobs:
       - name: Stop if branch exists
         if: steps.check_branch.outputs.branch_exists == 'true'
         run: exit 1
-      
-      - name: Create and push release branch
+
+      - name: Create release branch
         if: steps.check_branch.outputs.branch_exists == 'false'
         run: |
           RELEASE_BRANCH="${{ steps.get_version.outputs.release_branch }}"
-          NEW_MAJOR="${{ steps.get_version.outputs.new_major }}"
-          NEW_MINOR="${{ steps.get_version.outputs.new_minor }}"
           
-          # Create release branch
-          git checkout -b $RELEASE_BRANCH
+          # Prepare release args
+          RELEASE_ARGS="--batch-mode"
           
-          # Update version in pom.xml
-          mvn versions:set -DnewVersion="$NEW_MAJOR.$NEW_MINOR.0-SNAPSHOT" -DgenerateBackupPoms=false
-          
-          # Commit and push
-          git add pom.xml
-          git commit -m "Prepare release branch $RELEASE_BRANCH"
-          
-          if [ "${{ github.event.inputs.dryRun }}" != "true" ]; then
-            git push --set-upstream origin $RELEASE_BRANCH
-            echo "Created and pushed release branch $RELEASE_BRANCH"
-          else
-            echo "[DRY RUN] Would push release branch $RELEASE_BRANCH"
-          fi
-      
-      - name: Update master to next development version
-        if: steps.check_branch.outputs.branch_exists == 'false'
-        run: |
-          NEW_MAJOR="${{ steps.get_version.outputs.new_major }}"
-          NEW_MINOR="${{ steps.get_version.outputs.new_minor }}"
-          
-          # Switch back to master
-          git checkout master
-          
-          # Update version in pom.xml to next development version
-          if [ "${{ github.event.inputs.releaseType }}" == "major" ]; then
-            NEXT_DEV_VERSION="$NEW_MAJOR.0.0-SNAPSHOT"
-          else
-            NEXT_DEV_VERSION="$NEW_MAJOR.$NEW_MINOR.0-SNAPSHOT"
+          if [ "${{ github.event.inputs.dryRun }}" == "true" ]; then
+            RELEASE_ARGS="$RELEASE_ARGS -DdryRun=true"
           fi
           
-          mvn versions:set -DnewVersion="$NEXT_DEV_VERSION" -DgenerateBackupPoms=false
-          
-          # Commit and push
-          git add pom.xml
-          git commit -m "Bump version for next development iteration"
-          
-          if [ "${{ github.event.inputs.dryRun }}" != "true" ]; then
-            git push origin master
-            echo "Updated master branch to version $NEXT_DEV_VERSION"
-          else
-            echo "[DRY RUN] Would update master branch to version $NEXT_DEV_VERSION"
-          fi
+          # Create the release branch using Maven Release Plugin
+          mvn $RELEASE_ARGS \
+            release:branch \
+            -DbranchName=$RELEASE_BRANCH \
+            -DpushChanges=true \
+            -DautoVersionSubmodules=true \
+            -DupdateBranchVersions=true \
+            -DupdateWorkingCopyVersions=false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
