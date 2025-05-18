@@ -27,3 +27,4 @@ jobs:
             -DlocalCheckout=false \
             -DpreparationGoals="clean verify" \
             -Darguments="-DskipTests"
+            -Dgoals=""
