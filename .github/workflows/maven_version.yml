@@ -57,9 +57,13 @@ jobs:
             NEW_MAJOR=$MAJOR
             NEW_MINOR=$MINOR
           fi
+
+          NEXT_MINOR=$((NEW_MINOR + 1))
           
           RELEASE_BRANCH="release/$NEW_MAJOR.$NEW_MINOR.x"
+          DEV_VERSION="$NEW_MAJOR.$NEXT_MINOR.0-SNAPSHOT"
           echo "release_branch=$RELEASE_BRANCH" >> $GITHUB_OUTPUT
+          echo "dev_version=$DEV_VERSION" >> $GITHUB_OUTPUT
       
       - name: Check if release branch exists
         id: check_branch
@@ -87,7 +91,7 @@ jobs:
         if: steps.check_branch.outputs.branch_exists == 'false'
         run: |
           RELEASE_BRANCH="${{ steps.get_version.outputs.release_branch }}"
-          
+          DEV_VERSION="${{ steps.get_version.outputs.dev_version }}"
           # Prepare release args
           RELEASE_ARGS="--batch-mode"
           
@@ -99,6 +103,7 @@ jobs:
           mvn $RELEASE_ARGS \
             release:branch \
             -DbranchName=$RELEASE_BRANCH \
+            -DdevelopmentVersion=$DEV_VERSION \
             -DpushChanges=true \
             -DautoVersionSubmodules=true \
             -DupdateBranchVersions=true \
