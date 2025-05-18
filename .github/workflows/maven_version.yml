@@ -109,6 +109,6 @@ jobs:
             -DpushChanges=true \
             -DautoVersionSubmodules=true \
             -DupdateBranchVersions=true \
-            -DupdateWorkingCopyVersions=false
+            -DupdateWorkingCopyVersions=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
