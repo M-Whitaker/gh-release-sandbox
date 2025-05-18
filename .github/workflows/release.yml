@@ -21,6 +21,7 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - name: Changelog from Conventional Commits
+        id: changelog
         uses: requarks/changelog-action@v1
         with:
           excludeTypes: "build,docs,test,ci"
