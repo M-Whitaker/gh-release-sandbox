@@ -25,7 +25,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          persist-credentials: false
           ref: master
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
       
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -35,9 +42,12 @@ jobs:
           cache: 'maven'
       
       - name: Configure Git user
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           git config user.email "250615654+mw-releasebot[bot]@users.noreply.github.com"
           git config user.name "mw-releasebot[bot]"
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git
       
       - name: Extract current version
         id: get_version
