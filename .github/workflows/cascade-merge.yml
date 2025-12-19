@@ -1,0 +1,37 @@
+name: Automatic Cascade Merge
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  merge:
+    name: Cascading Auto Merge
+    runs-on: ubuntu-latest
+
+    if: |
+      github.event.pull_request.merged == true &&
+      startsWith(github.base_ref, 'release/')
+
+    steps:
+      - name: Get GitHub App Token
+        id: token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Automatic Merge
+        uses: ActionsDesk/cascading-downstream-merge@v3.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          merge_token: ${{ steps.token.outputs.token }}
+          prefixes: release/
+          ref_branch: master
