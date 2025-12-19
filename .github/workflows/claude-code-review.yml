@@ -38,7 +38,6 @@ jobs:
           ANTHROPIC_BASE_URL: "https://openrouter.ai/api"
         with:
           claude_code_oauth_token: ${{ secrets.ANTHROPIC_API_KEY }}
-          show_full_output: true
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
