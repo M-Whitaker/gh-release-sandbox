@@ -27,6 +27,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
           ref: master
+      
       - name: Generate GitHub App Token
         id: generate-token
         uses: actions/create-github-app-token@v1
@@ -41,13 +42,30 @@ jobs:
           java-version: '17'
           cache: 'maven'
       
-      - name: Configure Git user
+      - name: Configure Git with credentials
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          git config user.email "250615654+mw-releasebot[bot]@users.noreply.github.com"
-          git config user.name "mw-releasebot[bot]"
+          # Configure Git user
+          git config --global user.email "250615654+mw-releasebot[bot]@users.noreply.github.com"
+          git config --global user.name "mw-releasebot[bot]"
+          
+          # Configure credential helper to store credentials
+          git config --global credential.helper store
+          
+          # Store credentials for Maven to use
+          echo "https://x-access-token:${GH_TOKEN}@github.com" > ~/.git-credentials
+          chmod 600 ~/.git-credentials
+          
+          # Set remote URL with token
           git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git
+          
+          # Verify configuration
+          echo "Git configuration:"
+          git config --global user.name
+          git config --global user.email
+          git config --global credential.helper
+          echo "Remote URL configured (token hidden)"
       
       - name: Extract current version
         id: get_version
@@ -97,21 +115,32 @@ jobs:
       
       - name: Stop if branch exists
         if: steps.check_branch.outputs.branch_exists == 'true'
-        run: exit 1
+        run: |
+          echo "ERROR: Release branch already exists!"
+          exit 1
 
       - name: Create release branch
         if: steps.check_branch.outputs.branch_exists == 'false'
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           RELEASE_BRANCH="${{ steps.get_version.outputs.release_branch }}"
           DEV_VERSION="${{ steps.get_version.outputs.dev_version }}"
+          
           # Prepare release args
           RELEASE_ARGS="--batch-mode"
           
           if [ "${{ github.event.inputs.dryRun }}" == "true" ]; then
             RELEASE_ARGS="$RELEASE_ARGS -DdryRun=true"
+            echo "[DRY RUN] Would create branch: $RELEASE_BRANCH"
+            echo "[DRY RUN] Would set dev version to: $DEV_VERSION"
+          else
+            echo "Creating release branch: $RELEASE_BRANCH"
+            echo "Setting development version to: $DEV_VERSION"
           fi
           
           # Create the release branch using Maven Release Plugin
+          # Maven will use the stored Git credentials from ~/.git-credentials
           mvn $RELEASE_ARGS \
             release:branch \
             -DbranchName=$RELEASE_BRANCH \
@@ -120,5 +149,26 @@ jobs:
             -DautoVersionSubmodules=true \
             -DupdateBranchVersions=false \
             -DupdateWorkingCopyVersions=true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          if [ "${{ github.event.inputs.dryRun }}" != "true" ]; then
+            echo "✅ Successfully created release branch: $RELEASE_BRANCH"
+            echo "✅ Master branch updated to version: $DEV_VERSION"
+          fi
+      
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Release Branch Creation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Type**: ${{ github.event.inputs.releaseType }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Branch**: ${{ steps.get_version.outputs.release_branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New Dev Version**: ${{ steps.get_version.outputs.dev_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry Run**: ${{ github.event.inputs.dryRun }}" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.check_branch.outputs.branch_exists }}" == "true" ]; then
+            echo "- **Status**: ❌ Branch already exists" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ github.event.inputs.dryRun }}" == "true" ]; then
+            echo "- **Status**: ℹ️ Dry run completed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status**: ✅ Release branch created" >> $GITHUB_STEP_SUMMARY
+          fi
