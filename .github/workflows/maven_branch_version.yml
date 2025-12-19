@@ -1,4 +1,4 @@
-name: Maven Version
+name: Maven Branch Version
 
 on:
   workflow_dispatch:

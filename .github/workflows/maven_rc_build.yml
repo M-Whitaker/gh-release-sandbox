@@ -1,0 +1,57 @@
+name: Maven RC Build
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Release Branch to build'
+jobs:
+  Release-Candidate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Release branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+      - name: Configure Git with credentials
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          # Configure Git user
+          git config --global user.email "250615654+mw-releasebot[bot]@users.noreply.github.com"
+          git config --global user.name "mw-releasebot[bot]"
+          
+          # Configure credential helper to store credentials
+          git config --global credential.helper store
+          
+          # Store credentials for Maven to use
+          echo "https://x-access-token:${GH_TOKEN}@github.com" > ~/.git-credentials
+          chmod 600 ~/.git-credentials
+          
+          # Set remote URL with token
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git
+          
+          # Verify configuration
+          echo "Git configuration:"
+          git config --global user.name
+          git config --global user.email
+          git config --global credential.helper
+          echo "Remote URL configured (token hidden)"
+      - name: Perform Release
+        run: |
+          mvn release:clean \
+            release:prepare \
+            release:perform \
+            -DpushChanges=true \
+            -DlocalCheckout=false \
+            -DpreparationGoals="clean verify" \
+            -Darguments="-DskipTests" \
+            -Dgoals="" \
+            -DtagNameFormat="rel_@{project.version}"
