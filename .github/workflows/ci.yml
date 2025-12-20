@@ -25,5 +25,47 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Run tests with Maven
-        run: mvn -B test
+      - name: Build
+        run: mvn -B clean verify
+
+
+      - name: Sanitize Github variables
+        id: sanitize-gh-variables
+        run: |
+          # Determine branch name
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            branch="${GITHUB_HEAD_REF}"
+          else
+            branch="${GITHUB_REF_NAME}"
+          fi
+
+          # Sanitize variables (replace / with -)
+          repo="${GITHUB_REPOSITORY//\//-}"
+          workflow="${GITHUB_WORKFLOW//\//-}"
+          branch_sanitized="${branch//\//-}"
+
+          # Set outputs
+          echo "repository=$repo" >> $GITHUB_OUTPUT
+          echo "workflow=$workflow" >> $GITHUB_OUTPUT
+          echo "branch=$branch_sanitized" >> $GITHUB_OUTPUT
+
+      - name: Deploy Jacoco Report to External GitHub Pages
+        id: deploy-jacoco-report
+        uses: PavanMudigonda/html-reporter-github-pages@v1.5
+        with:
+          test_results: target/site/jacoco
+          keep_reports: 1
+          gh_pages: master # BRANCH NAME
+          subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}  # Level 1 Folder Structure
+          tool_name: ${{ steps.sanitize-gh-variables.outputs.workflow }} # Level 2 Folder Structure
+          workflow_name: ${{ steps.sanitize-gh-variables.outputs.branch }} # Level 3 Folder Structure
+          env: code-coverage # Level 4 Folder Structure
+          external_repository: m-whitaker/html-reports-site
+          use_actions_summary: false # Control job summary output
+          token: ${{ secrets.HTML_REPORTS_REPO_PAT }} # REQUIRED: PAT with repo permissions for external repository
+
+      - name: Github Summary
+        run: |
+          echo "## Jacoco Report" >> $GITHUB_STEP_SUMMARY
+          echo "* [History URL](${{ steps.deploy-jacoco-report.outputs.url }})" >> $GITHUB_STEP_SUMMARY
+          echo "* [Result URL](${{ steps.deploy-jacoco-report.outputs.latest_result_url }})" >> $GITHUB_STEP_SUMMARY
