@@ -67,7 +67,7 @@ jobs:
           git config --global credential.helper
           echo "Remote URL configured (token hidden)"
       
-      - name: Extract current version
+      - name: Extract and calculate versions
         id: get_version
         run: |
           CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
@@ -80,20 +80,44 @@ jobs:
           MINOR=${VERSION_PARTS[1]}
           
           # Calculate new versions based on release type
-          if [ "${{ github.event.inputs.releaseType }}" == "major" ]; then
-            NEW_MAJOR=$((MAJOR + 1))
-            NEW_MINOR=0
-          else
-            NEW_MAJOR=$MAJOR
-            NEW_MINOR=$MINOR
-          fi
-
-          NEXT_MINOR=$((NEW_MINOR + 1))
+          # 
+          # For minor: current is 0.13.0-SNAPSHOT
+          # - Release branch will be: release/0.13.x (from current 0.13.0-SNAPSHOT)
+          # - Next dev version (after branch): 0.14.0-SNAPSHOT
+          #
+          # For major: current is 0.13.0-SNAPSHOT
+          # - Master bumps to: 1.0.0-SNAPSHOT (before branching)
+          # - Release branch will be: release/1.0.x (from 1.0.0-SNAPSHOT)
+          # - Next dev version (after branch): 1.1.0-SNAPSHOT
           
-          RELEASE_BRANCH="release/$NEW_MAJOR.$NEW_MINOR.x"
-          DEV_VERSION="$NEW_MAJOR.$NEXT_MINOR.0-SNAPSHOT"
+          if [ "${{ github.event.inputs.releaseType }}" == "major" ]; then
+            # Major bump: 0.13.0-SNAPSHOT -> 1.0.0-SNAPSHOT (branch) -> 1.1.0-SNAPSHOT (master)
+            NEW_MAJOR=$((MAJOR + 1))
+            BRANCH_MINOR=0
+            MASTER_MINOR=1
+            
+            BRANCH_VERSION="$NEW_MAJOR.$BRANCH_MINOR.0-SNAPSHOT"
+            DEV_VERSION="$NEW_MAJOR.$MASTER_MINOR.0-SNAPSHOT"
+          else
+            # Minor bump: 0.13.0-SNAPSHOT -> 0.13.0-SNAPSHOT (branch) -> 0.14.0-SNAPSHOT (master)
+            NEW_MAJOR=$MAJOR
+            BRANCH_MINOR=$MINOR
+            MASTER_MINOR=$((MINOR + 1))
+            
+            BRANCH_VERSION="$NEW_MAJOR.$BRANCH_MINOR.0-SNAPSHOT"
+            DEV_VERSION="$NEW_MAJOR.$MASTER_MINOR.0-SNAPSHOT"
+          fi
+          
+          RELEASE_BRANCH="release/$NEW_MAJOR.$BRANCH_MINOR.x"
+          
+          echo "branch_version=$BRANCH_VERSION" >> $GITHUB_OUTPUT
           echo "release_branch=$RELEASE_BRANCH" >> $GITHUB_OUTPUT
           echo "dev_version=$DEV_VERSION" >> $GITHUB_OUTPUT
+          
+          echo "Calculated versions:"
+          echo "  Branch version: $BRANCH_VERSION"
+          echo "  Release branch: $RELEASE_BRANCH"
+          echo "  Master dev version: $DEV_VERSION"
       
       - name: Check if release branch exists
         id: check_branch
@@ -119,6 +143,29 @@ jobs:
           echo "ERROR: Release branch already exists!"
           exit 1
 
+      - name: Bump master to branch version (major only)
+        if: steps.check_branch.outputs.branch_exists == 'false' && github.event.inputs.releaseType == 'major'
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          BRANCH_VERSION="${{ steps.get_version.outputs.branch_version }}"
+          
+          if [ "${{ github.event.inputs.dryRun }}" == "true" ]; then
+            echo "[DRY RUN] Would update master to: $BRANCH_VERSION"
+          else
+            echo "Updating master to: $BRANCH_VERSION"
+            
+            # Update version in pom.xml
+            mvn versions:set -DnewVersion="$BRANCH_VERSION" -DgenerateBackupPoms=false
+            
+            # Commit and push
+            git add pom.xml
+            git commit -m "[maven-release-plugin] prepare for major version $BRANCH_VERSION"
+            git push origin master
+            
+            echo "✅ Master updated to $BRANCH_VERSION"
+          fi
+
       - name: Create release branch
         if: steps.check_branch.outputs.branch_exists == 'false'
         env:
@@ -126,6 +173,7 @@ jobs:
         run: |
           RELEASE_BRANCH="${{ steps.get_version.outputs.release_branch }}"
           DEV_VERSION="${{ steps.get_version.outputs.dev_version }}"
+          BRANCH_VERSION="${{ steps.get_version.outputs.branch_version }}"
           
           # Prepare release args
           RELEASE_ARGS="--batch-mode"
@@ -133,14 +181,15 @@ jobs:
           if [ "${{ github.event.inputs.dryRun }}" == "true" ]; then
             RELEASE_ARGS="$RELEASE_ARGS -DdryRun=true"
             echo "[DRY RUN] Would create branch: $RELEASE_BRANCH"
-            echo "[DRY RUN] Would set dev version to: $DEV_VERSION"
+            echo "[DRY RUN] Branch would have version: $BRANCH_VERSION"
+            echo "[DRY RUN] Would set master dev version to: $DEV_VERSION"
           else
             echo "Creating release branch: $RELEASE_BRANCH"
-            echo "Setting development version to: $DEV_VERSION"
+            echo "Branch will have version: $BRANCH_VERSION"
+            echo "Setting master development version to: $DEV_VERSION"
           fi
           
           # Create the release branch using Maven Release Plugin
-          # Maven will use the stored Git credentials from ~/.git-credentials
           mvn $RELEASE_ARGS \
             release:branch \
             -DbranchName="$RELEASE_BRANCH" \
@@ -163,9 +212,12 @@ jobs:
           echo "## Release Branch Creation Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Release Type**: ${{ github.event.inputs.releaseType }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Current Version**: ${{ steps.get_version.outputs.current_version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Release Branch**: ${{ steps.get_version.outputs.release_branch }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **New Dev Version**: ${{ steps.get_version.outputs.dev_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch Version**: ${{ steps.get_version.outputs.branch_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New Master Version**: ${{ steps.get_version.outputs.dev_version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Dry Run**: ${{ github.event.inputs.dryRun }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ steps.check_branch.outputs.branch_exists }}" == "true" ]; then
             echo "- **Status**: ❌ Branch already exists" >> $GITHUB_STEP_SUMMARY
@@ -173,4 +225,16 @@ jobs:
             echo "- **Status**: ℹ️ Dry run completed" >> $GITHUB_STEP_SUMMARY
           else
             echo "- **Status**: ✅ Release branch created" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Version Flow" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ github.event.inputs.releaseType }}" == "major" ]; then
+            echo "1. Master: ${{ steps.get_version.outputs.current_version }} → ${{ steps.get_version.outputs.branch_version }}" >> $GITHUB_STEP_SUMMARY
+            echo "2. Branch created: ${{ steps.get_version.outputs.release_branch }} (${{ steps.get_version.outputs.branch_version }})" >> $GITHUB_STEP_SUMMARY
+            echo "3. Master: ${{ steps.get_version.outputs.branch_version }} → ${{ steps.get_version.outputs.dev_version }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "1. Branch created: ${{ steps.get_version.outputs.release_branch }} (${{ steps.get_version.outputs.branch_version }})" >> $GITHUB_STEP_SUMMARY
+            echo "2. Master: ${{ steps.get_version.outputs.current_version }} → ${{ steps.get_version.outputs.dev_version }}" >> $GITHUB_STEP_SUMMARY
           fi
