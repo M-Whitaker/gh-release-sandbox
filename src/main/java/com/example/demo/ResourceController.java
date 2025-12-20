@@ -9,6 +9,6 @@ public class ResourceController {
 
     @GetMapping("/resource-status")
     public Map<String, String> getResourceStatus() {
-        return Map.of("message", "Pong");
+        return Map.of("msg", "Pong");
     }
 }
