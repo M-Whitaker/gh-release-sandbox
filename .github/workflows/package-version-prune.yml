@@ -1,4 +1,4 @@
-name: Automatic Cascade Merge
+name: Prune Package Versions
 
 on:
   schedule:
@@ -11,11 +11,11 @@ permissions:
 
 jobs:
   merge:
-    name: Cascading Auto Merge
+    name: Delete Package Versions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/delete-package-versions@v5
         with:
-          package-name: 'com.example.demo'
+          package-name: 'com/example/demo'
           package-type: 'maven'
           min-versions-to-keep: 2
