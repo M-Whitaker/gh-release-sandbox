@@ -66,6 +66,6 @@ jobs:
 
       - name: Github Summary
         run: |
-          echo "## Jacoco Report:" >> $GITHUB_STEP_SUMMARY
-          echo "* GH Pages History URL: ${{ steps.deploy-jacoco-report.outputs.url }}" >> $GITHUB_STEP_SUMMARY
-          echo "* GH Pages Latest Result URL:  ${{ steps.deploy-jacoco-report.outputs.latest_result_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "## Jacoco Report" >> $GITHUB_STEP_SUMMARY
+          echo "* [History URL](${{ steps.deploy-jacoco-report.outputs.url }})" >> $GITHUB_STEP_SUMMARY
+          echo "* [Result URL](${{ steps.deploy-jacoco-report.outputs.latest_result_url }})" >> $GITHUB_STEP_SUMMARY
