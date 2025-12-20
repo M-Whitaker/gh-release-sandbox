@@ -29,14 +29,25 @@ jobs:
         run: mvn -B clean verify
 
 
-      - name: Get branch name
-        id: branch
+      - name: Sanitize Github variables
+        id: sanitize-gh-variables
         run: |
+          # Determine branch name
           if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            echo "branch=${GITHUB_HEAD_REF}" >> $GITHUB_OUTPUT
+            branch="${GITHUB_HEAD_REF}"
           else
-            echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+            branch="${GITHUB_REF_NAME}"
           fi
+
+          # Sanitize variables (replace / with -)
+          repo="${GITHUB_REPOSITORY//\//-}"
+          workflow="${GITHUB_WORKFLOW//\//-}"
+          branch_sanitized="${branch//\//-}"
+
+          # Set outputs
+          echo "repository=$repo" >> $GITHUB_OUTPUT
+          echo "workflow=$workflow" >> $GITHUB_OUTPUT
+          echo "branch=$branch_sanitized" >> $GITHUB_OUTPUT
 
       - name: Deploy Report to External GitHub Pages
         uses: PavanMudigonda/html-reporter-github-pages@v1.5
@@ -44,9 +55,9 @@ jobs:
           test_results: target/site/jacoco
           keep_reports: 1
           gh_pages: master # BRANCH NAME
-          subfolder: ${{ github.repository }}  # Level 1 Folder Structure
-          tool_name: ${{ github.workflow }} # Level 2 Folder Structure
-          workflow_name: ${{ steps.branch.outputs.branch }} # Level 3 Folder Structure
+          subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}  # Level 1 Folder Structure
+          tool_name: ${{ steps.sanitize-gh-variables.outputs.workflow }} # Level 2 Folder Structure
+          workflow_name: ${{ steps.sanitize-gh-variables.outputs.branch }} # Level 3 Folder Structure
           env: code-coverage # Level 4 Folder Structure
           external_repository: m-whitaker/html-reports-site
           use_actions_summary: false # Control job summary output
