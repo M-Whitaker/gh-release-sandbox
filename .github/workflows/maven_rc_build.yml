@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write
     steps:
       - name: Checkout Release branch
         uses: actions/checkout@v4
@@ -52,14 +53,16 @@ jobs:
           git config --global user.email
           git config --global credential.helper
           echo "Remote URL configured (token hidden)"
-      - name: Perform Release
+      - name: Prepare Release
         run: |
-          mvn release:clean \
-            release:prepare \
-            release:perform \
-            -DpushChanges=true \
-            -DlocalCheckout=false \
-            -DpreparationGoals="clean verify" \
-            -Darguments="-DskipTests" \
-            -Dgoals="" \
-            -DtagNameFormat="rel_@{project.version}"
+          mvn release:clean release:prepare \
+              -DpushChanges=true \
+              -DpreparationGoals="clean verify" \
+              -DtagNameFormat="rel_@{project.version}" \
+              -B
+      - name: Perform Release
+        run: /
+          mvn release:perform \
+            -Dgoals="deploy" \
+            -Darguments="-Dmaven.test.skip=true" \
+            -B
