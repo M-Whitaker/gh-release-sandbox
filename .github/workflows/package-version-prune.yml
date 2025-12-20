@@ -1,0 +1,21 @@
+name: Automatic Cascade Merge
+
+on:
+  schedule:
+    - cron: "01 0 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  merge:
+    name: Cascading Auto Merge
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          package-name: 'com.example.demo'
+          package-type: 'maven'
+          min-versions-to-keep: 2
