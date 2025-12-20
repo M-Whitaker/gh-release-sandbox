@@ -203,7 +203,7 @@ jobs:
             -DautoVersionSubmodules=true \
             -DupdateBranchVersions=false \
             -DupdateWorkingCopyVersions=true \
-            -DscmBranchCommitComment="[maven-release-plugin] prepare branch $RELEASE_BRANCH" \
+            -DscmBranchCommitComment="@{prefix} prepare branch $RELEASE_BRANCH" \
             -DscmCommentPrefix="[maven-release-plugin] [skip ci]"
           
           if [ "${{ github.event.inputs.dryRun }}" != "true" ]; then
