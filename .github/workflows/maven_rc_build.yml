@@ -61,7 +61,7 @@ jobs:
               -DtagNameFormat="rel_@{project.version}" \
               -B
       - name: Perform Release
-        run: /
+        run: |
           mvn release:perform \
             -Dgoals="deploy" \
             -Darguments="-Dmaven.test.skip=true" \
