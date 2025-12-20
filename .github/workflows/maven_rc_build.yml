@@ -17,6 +17,28 @@ jobs:
       contents: write
       packages: write
     steps:
+      - name: Check workflow status on default branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              branch: 'master',
+              status: 'completed',
+              per_page: 1
+            });
+
+            if (!data.workflow_runs.length) {
+              core.setFailed('No workflow runs found on master branch');
+              return;
+            }
+
+            const run = data.workflow_runs[0];
+            if (run.conclusion !== 'success') {
+              core.setFailed(`Latest master branch run did not succeed (status: ${run.conclusion})`);
+            }
       - name: Checkout Release branch
         uses: actions/checkout@v4
         with:
@@ -61,6 +83,8 @@ jobs:
               -DtagNameFormat="rel_@{project.version}" \
               -B
       - name: Perform Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn release:perform \
             -Dgoals="deploy" \
