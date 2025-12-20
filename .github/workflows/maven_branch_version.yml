@@ -1,5 +1,5 @@
 name: Maven Branch Version
-
+run-name: Creating new ${{ github.event.inputs.releaseType }} version from master!
 on:
   workflow_dispatch:
     inputs:
@@ -143,8 +143,8 @@ jobs:
           # Maven will use the stored Git credentials from ~/.git-credentials
           mvn $RELEASE_ARGS \
             release:branch \
-            -DbranchName=$RELEASE_BRANCH \
-            -DdevelopmentVersion=$DEV_VERSION \
+            -DbranchName="$RELEASE_BRANCH" \
+            -DdevelopmentVersion="$DEV_VERSION" \
             -DpushChanges=true \
             -DautoVersionSubmodules=true \
             -DupdateBranchVersions=false \
