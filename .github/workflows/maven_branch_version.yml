@@ -203,8 +203,8 @@ jobs:
             -DautoVersionSubmodules=true \
             -DupdateBranchVersions=false \
             -DupdateWorkingCopyVersions=true \
-            -DscmBranchCommitComment="[maven-release-plugin] prepare branch $RELEASE_BRANCH" \
-            -DscmDevelopmentCommitComment="[maven-release-plugin] prepare for next development iteration ($DEV_VERSION)"
+            -DscmBranchCommitComment="@{prefix} prepare branch $RELEASE_BRANCH" \
+            -DscmCommentPrefix="[maven-release-plugin] [skip ci]"
           
           if [ "${{ github.event.inputs.dryRun }}" != "true" ]; then
             echo "✅ Successfully created release branch: $RELEASE_BRANCH"
