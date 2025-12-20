@@ -1,5 +1,10 @@
 name: Maven Branch Version
 run-name: Creating new ${{ github.event.inputs.releaseType }} version from master!
+
+concurrency:
+  group: maven-release-branch
+  cancel-in-progress: false
+
 on:
   workflow_dispatch:
     inputs:

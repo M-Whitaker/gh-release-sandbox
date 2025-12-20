@@ -1,5 +1,10 @@
 name: Maven RC Build
 run-name: Building ${{ inputs.branch }} 🚀
+
+concurrency:
+  group: maven-rc-${{ inputs.branch }}  # One RC build per branch at a time
+  cancel-in-progress: false
+
 on:
   workflow_dispatch:
     inputs:
