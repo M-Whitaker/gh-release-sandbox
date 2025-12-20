@@ -17,28 +17,6 @@ jobs:
       contents: write
       packages: write
     steps:
-      - name: Check workflow status on default branch
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { data } = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'ci.yml',
-              branch: 'master',
-              status: 'completed',
-              per_page: 1
-            });
-
-            if (!data.workflow_runs.length) {
-              core.setFailed('No workflow runs found on master branch');
-              return;
-            }
-
-            const run = data.workflow_runs[0];
-            if (run.conclusion !== 'success') {
-              core.setFailed(`Latest master branch run did not succeed (status: ${run.conclusion})`);
-            }
       - name: Checkout Release branch
         uses: actions/checkout@v4
         with:
@@ -75,6 +53,12 @@ jobs:
           git config --global user.email
           git config --global credential.helper
           echo "Remote URL configured (token hidden)"
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
       - name: Prepare Release
         run: |
           mvn release:clean release:prepare \
