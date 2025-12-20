@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [rel_0.10.0] - 2025-12-20
+### :sparkles: New Features
+- [`18c26e3`](https://github.com/M-Whitaker/gh-release-sandbox/commit/18c26e3ac5543a0e07979b226ae93d1812adf2ef) - Re-order release workflow to allow for commit of changelog *(commit by [@M-Whitaker](https://github.com/M-Whitaker))*
+
+
 ## [rel_0.2.0] - 2025-05-18
 ### :sparkles: New Features
 - [`2d2fdf4`](https://github.com/M-Whitaker/gh-release-sandbox/commit/2d2fdf488520ae0db52c8b165135d494242cda32) - [JIRA-9871] Add new amazing feature *(commit by [@M-Whitaker](https://github.com/M-Whitaker))*
@@ -15,3 +20,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [rel_0.1.1]: https://github.com/M-Whitaker/gh-release-sandbox/compare/rel_0.1.0...rel_0.1.1
 [rel_0.2.0]: https://github.com/M-Whitaker/gh-release-sandbox/compare/rel_0.1.1...rel_0.2.0
+[rel_0.10.0]: https://github.com/M-Whitaker/gh-release-sandbox/compare/rel_0.9.0...rel_0.10.0
