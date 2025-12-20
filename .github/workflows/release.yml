@@ -1,5 +1,5 @@
 name: Release Workflow
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: Releasing ${{ github.ref_name }} 🚀
 on:
   push:
     tags:

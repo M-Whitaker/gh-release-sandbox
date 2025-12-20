@@ -1,4 +1,5 @@
 name: Maven RC Build
+run-name: Building ${{ inputs.branch }} 🚀
 on:
   workflow_dispatch:
     inputs:
