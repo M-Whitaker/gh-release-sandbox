@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [rel_2.2.0] - 2025-12-20
+### :bug: Bug Fixes
+- [`043c4d7`](https://github.com/M-Whitaker/gh-release-sandbox/commit/043c4d7f8df96ed59ee32c493504e6eb2f3597de) - GH-14 RC build workflow *(PR [#16](https://github.com/M-Whitaker/gh-release-sandbox/pull/16) by [@M-Whitaker](https://github.com/M-Whitaker))*
+
+
 ## [rel_2.1.0] - 2025-12-20
 ### :bug: Bug Fixes
 - [`0c611a1`](https://github.com/M-Whitaker/gh-release-sandbox/commit/0c611a1542fe13c09a6cabf013406ddf9db5128a) - fetch depth not finding old branches *(commit by [@M-Whitaker](https://github.com/M-Whitaker))*
@@ -39,3 +44,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [rel_0.13.0]: https://github.com/M-Whitaker/gh-release-sandbox/compare/rel_0.10.0...rel_0.13.0
 [rel_2.0.0]: https://github.com/M-Whitaker/gh-release-sandbox/compare/rel_0.13.0...rel_2.0.0
 [rel_2.1.0]: https://github.com/M-Whitaker/gh-release-sandbox/compare/rel_2.0.0...rel_2.1.0
+[rel_2.2.0]: https://github.com/M-Whitaker/gh-release-sandbox/compare/rel_2.1.0...rel_2.2.0
