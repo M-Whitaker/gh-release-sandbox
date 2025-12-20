@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [rel_2.0.0] - 2025-12-20
+### :sparkles: New Features
+- [`2e3697d`](https://github.com/M-Whitaker/gh-release-sandbox/commit/2e3697d289014b700b131780b77d5c7c8f723b07) - Add concurrency locks on release workflows *(commit by [@M-Whitaker](https://github.com/M-Whitaker))*
+
+
 ## [rel_0.13.0] - 2025-12-20
 ### :bug: Bug Fixes
 - [`2a6b305`](https://github.com/M-Whitaker/gh-release-sandbox/commit/2a6b305ac4895bd45517a0ee1a1b60f3475e8fab) - Re-order release type choice to default minor *(commit by [@M-Whitaker](https://github.com/M-Whitaker))*
@@ -27,3 +32,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [rel_0.2.0]: https://github.com/M-Whitaker/gh-release-sandbox/compare/rel_0.1.1...rel_0.2.0
 [rel_0.10.0]: https://github.com/M-Whitaker/gh-release-sandbox/compare/rel_0.9.0...rel_0.10.0
 [rel_0.13.0]: https://github.com/M-Whitaker/gh-release-sandbox/compare/rel_0.10.0...rel_0.13.0
+[rel_2.0.0]: https://github.com/M-Whitaker/gh-release-sandbox/compare/rel_0.13.0...rel_2.0.0
