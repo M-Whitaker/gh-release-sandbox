@@ -8,8 +8,8 @@ on:
         required: true
         type: choice
         options:
-          - major
           - minor
+          - major
       dryRun:
         description: 'Dry run (no commits/push)'
         type: boolean
@@ -150,7 +150,7 @@ jobs:
             -DupdateBranchVersions=false \
             -DupdateWorkingCopyVersions=true \
             -DscmBranchCommitComment="[maven-release-plugin] prepare branch $RELEASE_BRANCH" \
-            -DscmDevelopmentCommitComment="[maven-release-plugin] prepare for next development iteration"
+            -DscmDevelopmentCommitComment="[maven-release-plugin] prepare for next development iteration ($DEV_VERSION)"
           
           if [ "${{ github.event.inputs.dryRun }}" != "true" ]; then
             echo "✅ Successfully created release branch: $RELEASE_BRANCH"
