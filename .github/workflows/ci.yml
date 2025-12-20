@@ -25,5 +25,19 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Run tests with Maven
-        run: mvn -B test
+      - name: Build
+        run: mvn -B clean verify
+
+      - name: Deploy Report to External GitHub Pages
+        uses: PavanMudigonda/html-reporter-github-pages@v1.5
+        with:
+          test_results: target/site/jacoco
+          keep_reports: 1
+          gh_pages: master # BRANCH NAME
+          subfolder: ${{ github.repository }}  # Level 1 Folder Structure
+          tool_name: code-coverage # Level 2 Folder Structure
+          workflow_name: ${{ github.workflow }} # Level 3 Folder Structure
+          env: ${{ github.ref }} # Level 4 Folder Structure
+          external_repository: m-whitaker/html-reports-site
+          use_actions_summary: false # Control job summary output
+          token: ${{ secrets.HTML_REPORTS_REPO_PAT }} # REQUIRED: PAT with repo permissions for external repository
