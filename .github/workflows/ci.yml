@@ -57,8 +57,8 @@ jobs:
           gh_pages: master # BRANCH NAME
           subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}-${{ steps.sanitize-gh-variables.outputs.branch }}  # Branch is here to prevent deletion across branches
           tool_name: ${{ steps.sanitize-gh-variables.outputs.workflow }}
-          workflow_name: ''
-          env: code-coverage
+          workflow_name: code-coverage
+          env: ''
           external_repository: m-whitaker/html-reports-site
           use_actions_summary: false # Control job summary output
           token: ${{ secrets.HTML_REPORTS_REPO_PAT }} # REQUIRED: PAT with repo permissions for external repository
@@ -72,8 +72,8 @@ jobs:
           gh_pages: master
           subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}-${{ steps.sanitize-gh-variables.outputs.branch }}
           tool_name: ${{ steps.sanitize-gh-variables.outputs.workflow }}
-          workflow_name: ''
-          env: unit-tests
+          workflow_name: unit-tests
+          env: ''
           external_repository: m-whitaker/html-reports-site
           use_actions_summary: false
           token: ${{ secrets.HTML_REPORTS_REPO_PAT }}
