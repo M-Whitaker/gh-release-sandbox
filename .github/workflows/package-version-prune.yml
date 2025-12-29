@@ -16,6 +16,6 @@ jobs:
     steps:
       - uses: actions/delete-package-versions@v5
         with:
-          package-name: 'com/example/demo'
+          package-name: 'com.example.demo'
           package-type: 'maven'
           min-versions-to-keep: 2
