@@ -54,7 +54,7 @@ jobs:
         uses: PavanMudigonda/html-reporter-github-pages@v1.5
         with:
           test_results: target/site/jacoco
-          keep_reports: 1
+          keep_reports: 5
           gh_pages: master # BRANCH NAME
           subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}
           tool_name: ${{ steps.sanitize-gh-variables.outputs.branch }}  # Branch is here to prevent deletion across branches
