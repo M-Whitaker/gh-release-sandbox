@@ -45,17 +45,12 @@ jobs:
         with:
           target: 'example-api.yaml'
           format: openapi
-          artifact_name: zap-scan
-          cmd_options: '-a'
-          rules_file_name: '.zap/rules.tsv'
           allow_issue_writing: false
     
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'http://localhost:8080'
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a'
           allow_issue_writing: false
     
       - name: Stop Spring Boot application
