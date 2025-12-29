@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - 'release/**'
   pull_request:
     branches:
       - master
@@ -56,16 +55,36 @@ jobs:
           test_results: target/site/jacoco
           keep_reports: 5
           gh_pages: master # BRANCH NAME
-          subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}-${{ steps.sanitize-gh-variables.outputs.branch }}  # Branch is here to prevent deletion across branches
-          tool_name: ${{ steps.sanitize-gh-variables.outputs.workflow }}
-          workflow_name: code-coverage
+          subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}-${{ steps.sanitize-gh-variables.outputs.branch }}-${{ steps.sanitize-gh-variables.outputs.workflow }}-code-coverage
+          tool_name: ''
+          workflow_name: ''
           env: ''
           external_repository: m-whitaker/html-reports-site
           use_actions_summary: false # Control job summary output
           token: ${{ secrets.HTML_REPORTS_REPO_PAT }} # REQUIRED: PAT with repo permissions for external repository
 
+      - name: Deploy Unit Tests Allure Report to External GitHub Pages
+        id: deploy-unit-test-report
+        uses: PavanMudigonda/html-reporter-github-pages@v1.5
+        with:
+          test_results: target/site/allure-maven-plugin
+          keep_reports: 5
+          gh_pages: master
+          subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}-${{ steps.sanitize-gh-variables.outputs.branch }}-${{ steps.sanitize-gh-variables.outputs.workflow }}-unit-tests
+          tool_name: ''
+          workflow_name: ''
+          env: ''
+          external_repository: m-whitaker/html-reports-site
+          use_actions_summary: false
+          token: ${{ secrets.HTML_REPORTS_REPO_PAT }}
+
+      
       - name: Github Summary
         run: |
           echo "## Jacoco Report" >> $GITHUB_STEP_SUMMARY
           echo "* [History URL](${{ steps.deploy-jacoco-report.outputs.url }})" >> $GITHUB_STEP_SUMMARY
           echo "* [Result URL](${{ steps.deploy-jacoco-report.outputs.latest_result_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Unit Test Allure Report" >> $GITHUB_STEP_SUMMARY
+          echo "* [History URL](${{ steps.deploy-unit-test-report.outputs.url }})" >> $GITHUB_STEP_SUMMARY
+          echo "* [Result URL](${{ steps.deploy-unit-test-report.outputs.latest_result_url }})" >> $GITHUB_STEP_SUMMARY
