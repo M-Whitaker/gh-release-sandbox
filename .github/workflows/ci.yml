@@ -55,8 +55,10 @@ jobs:
           test_results: target/site/jacoco
           keep_reports: 5
           gh_pages: master # BRANCH NAME
-          subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}-${{ steps.sanitize-gh-variables.outputs.branch }}  # Branch is here to prevent deletion across branches
-          tool_name: ${{ steps.sanitize-gh-variables.outputs.workflow }}-code-coverage
+          subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}-${{ steps.sanitize-gh-variables.outputs.branch }}-${{ steps.sanitize-gh-variables.outputs.workflow }}-code-coverage
+          tool_name: ''
+          workflow_name: ''
+          env: ''
           external_repository: m-whitaker/html-reports-site
           use_actions_summary: false # Control job summary output
           token: ${{ secrets.HTML_REPORTS_REPO_PAT }} # REQUIRED: PAT with repo permissions for external repository
@@ -68,8 +70,10 @@ jobs:
           test_results: target/site/allure-maven-plugin
           keep_reports: 5
           gh_pages: master
-          subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}-${{ steps.sanitize-gh-variables.outputs.branch }}
-          tool_name: ${{ steps.sanitize-gh-variables.outputs.workflow }}-unit-tests
+          subfolder: ${{ steps.sanitize-gh-variables.outputs.repository }}-${{ steps.sanitize-gh-variables.outputs.branch }}-${{ steps.sanitize-gh-variables.outputs.workflow }}-unit-tests
+          tool_name: ''
+          workflow_name: ''
+          env: ''
           external_repository: m-whitaker/html-reports-site
           use_actions_summary: false
           token: ${{ secrets.HTML_REPORTS_REPO_PAT }}
