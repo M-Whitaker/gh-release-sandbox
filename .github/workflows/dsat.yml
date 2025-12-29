@@ -45,6 +45,7 @@ jobs:
         with:
           target: 'example-api.yaml'
           format: openapi
+          artifact_name: zap-scan
           cmd_options: '-a'
           rules_file_name: '.zap/rules.tsv'
           allow_issue_writing: false
