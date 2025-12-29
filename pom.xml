@@ -25,6 +25,7 @@
 	</distributionManagement>
 	<properties>
 		<java.version>17</java.version>
+		<allure.version>2.24.0</allure.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -37,6 +38,21 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Allure Test Framework -->
+		<dependency>
+			<groupId>io.qameta.allure</groupId>
+			<artifactId>allure-junit5</artifactId>
+			<version>${allure.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.qameta.allure</groupId>
+			<artifactId>allure-assertj</artifactId>
+			<version>${allure.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -44,6 +60,15 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+					</systemPropertyVariables>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -66,6 +91,23 @@
 					<goals>
 						<goal>report</goal>
 					</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Allure Maven Plugin -->
+			<plugin>
+				<groupId>io.qameta.allure</groupId>
+				<artifactId>allure-maven-plugin</artifactId>
+				<version>2.12.0</version>
+
+				<executions>
+					<execution>
+						<id>allure-report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
