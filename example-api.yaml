@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: Demo Resource API
+  description: API for checking resource status
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.example.com
+    description: Production server
+
+tags:
+  - name: Resource
+    description: Resource status operations
+
+paths:
+  /resource-status:
+    get:
+      tags:
+        - Resource
+      summary: Get resource status
+      description: Returns the current status of the resource with a simple message
+      operationId: getResourceStatus
+      responses:
+        '200':
+          description: Successful response with resource status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Status message
+                    example: Pong
+                required:
+                  - message
+              examples:
+                success:
+                  value:
+                    message: "Pong"
+                  summary: Successful status check
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+        status:
+          type: integer
+          description: HTTP status code
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          description: Error message
+        path:
+          type: string
+          description: Request path
+      required:
+        - timestamp
+        - status
+        - error
+        - path
